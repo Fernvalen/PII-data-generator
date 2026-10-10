@@ -48,3 +48,38 @@ def generate_healthcare_records(count=10):
         "prescription": fake.sentence(nb_words=5),
         "provider": fake.company()
     } for _ in range(count)]
+
+def generate_from_schema(schema_dict, count=10):
+    """
+    Generate a list of data based on a provided shema dictionary.
+    Args:
+        schema_dict (dict): A dictionary defining the schema for the data to be generated.
+        count (int): The number of records to be generated.  Default is 5.
+    """
+    properties = schema_dict.get("properties", {})
+    records = []
+
+    for _ in range(count):
+        record = {}
+        for field, details in properties.items():
+            field_type = details.get("type", "string")
+            field_format = details.get("format", "")
+
+            if field_type == "string":
+                if field_format == "email":
+                    record[field] = fake.email()
+                elif field_format == "uuid":
+                    record[field] = fake.uuid4()
+                elif field_format == "date":
+                    record[field] = fake.date()
+                else:
+                    record[field] = fake.text(max_nb_chars=20)
+            elif field_type == "integer":
+                record[field] = fake.random_int(min=1, max=100)
+            elif field_type == "boolean":
+                record[field] = fake.boolean()
+            else:
+                record[field] = None
+
+        records.append(record)
+    return records

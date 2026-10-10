@@ -9,14 +9,29 @@
 
         <form method="POST">
             <label for="data_type">Data Type:</label>
-            <select name="data_type" id="data_type">
-                <option value="user_profiles">👤 User Profiles</option>
-                <option value="financial_transactions">💳 Financial Transactions</option>
-                <option value="healthcare_records">🏥 Healthcare Records</option>
+            <select name="data_type" id="data_type" onchange="toggleSchemaTextArea()">
+                <option value="user_profiles" {% if selected_type == "user_profiles" %}selected{% endif %}>👤 User Profiles</option>
+                <option value="financial_transactions" {% if selected_type == "financial_transactions" %}selected{% endif %}>💳 Financial Transactions</option>
+                <option value="healthcare_records" {% if selected_type == "healthcare_records" %}selected{% endif %}>🏥 Healthcare Records</option>
+                <option value="custom_schema" {% if selected_type == "custom_schema" %}selected{% endif %}>⚙️ Custom JSON Schema</option>
             </select>"
 
             <label for="count">Record Count:</label>
-            <input type="number" name="count" id="count" value="10" min="1" max="100">
+            <input type="number" name="count" id="count" value="{{ request.form.get('count', 10) }}" min="1" max="100">
+            <br><br>
+
+            <div id="schemaContainer" style="display: none;">
+                <label for="schema_json">Custom JSON Schema:</label><br>
+                <textarea name="schema_json" id="schema_json" rows="10" cols="50" placeholder='{
+                    "properties": {
+                        "user_id": {"type": "string", "format": "uuid"},
+                        "email": {"type": "string", "format": "email"},
+                        "age": {"type": "integer"}
+                    }
+                }'>
+                </textarea>{{ request.form.get('schema_json', '') }}
+                <br><br>
+            </div>
 
             <button type="submit">Generate Data</button>
         </form>
@@ -42,5 +57,23 @@
                 </tbody>
             </table>
         {% endif %}
+
+        {% if error %}
+            <p style="color: red;"><strong>{{ error }}</strong></p>
+        {% endif %}
+
+        <script>
+            function toggleSchemaTextArea() {
+                const selectElement = document.getElementById("data_type");
+                const schemaContainer = document.getElementById("schemaContainer");
+
+                if (selectElement.value == "custom_schema") {
+                    schemaContainer.style.display = "block";
+                } else {
+                    schemaContainer.style.display = "none";
+                }
+            }
+            window.onload = toggleSchemaTextArea;
+        </script>
     </body>
 </html>
